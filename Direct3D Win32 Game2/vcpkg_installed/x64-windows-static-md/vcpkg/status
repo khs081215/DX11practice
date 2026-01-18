@@ -1,0 +1,32 @@
+Package: vcpkg-cmake-config
+Version: 2024-05-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: 88d62c55c1051d89674c92aa4ea57b6425eb7e18b704235a83ffd14296fa0067
+Status: install ok installed
+
+Package: vcpkg-cmake
+Version: 2024-04-23
+Architecture: x64-windows
+Multi-Arch: same
+Abi: cb3909f625b8e31873b5a978e08a93615a03bb0b89ff8f85eb8af67cb793ab32
+Status: install ok installed
+
+Package: directxmath
+Version: 2025-04-03
+Depends: vcpkg-cmake:x64-windows, vcpkg-cmake-config:x64-windows
+Architecture: x64-windows-static-md
+Multi-Arch: same
+Abi: 444b8155d90df59d2b9c86ed566538285ef24b2f69d30634c19c6320ff2f3734
+Description: DirectXMath SIMD C++ math library
+Status: install ok installed
+
+Package: directxtk
+Version: 2025-10-27
+Depends: directxmath, vcpkg-cmake:x64-windows, vcpkg-cmake-config:x64-windows
+Architecture: x64-windows-static-md
+Multi-Arch: same
+Abi: e06ef28c89cb5df3d6f384c75269cd7373343db261c070c24abc9f5f6c2f40e5
+Description: A collection of helper classes for writing DirectX 11.x code in C++.
+Status: install ok installed
+
