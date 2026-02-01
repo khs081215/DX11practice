@@ -18,6 +18,8 @@
     <ClInclude Include="DeviceResources.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="AnimatedTexture.h" />
+    <ClInclude Include="ScrollingBackground.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -35,6 +37,12 @@
       <Filter>Assets</Filter>
     </Image>
     <Image Include="cat.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="shipanimated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="starfield.png">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>
