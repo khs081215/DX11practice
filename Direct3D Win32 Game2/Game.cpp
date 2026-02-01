@@ -1,4 +1,4 @@
-//
+﻿//
 // Game.cpp
 //
 
@@ -82,13 +82,19 @@ void Game::Render()
     m_deviceResources->PIXEndEvent();
 
 
+    float time = float(m_timer.GetTotalSeconds());
 
-    m_spriteBatch->Begin();
+    m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states->NonPremultiplied());
+
+
+    m_spriteBatch->Draw(m_background.Get(), m_fullscreenRect);
 
     m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr,
         Colors::White, 0.f, m_origin);
 
     m_spriteBatch->End();
+
+
 
 
     // Show the new frame.
@@ -179,16 +185,13 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     device;
-    DX::ThrowIfFailed(
-        CreateWICTextureFromFile(device, L"cat.png", nullptr,
-            m_texture.ReleaseAndGetAddressOf()));
 
     auto context = m_deviceResources->GetD3DDeviceContext();
     m_spriteBatch = std::make_unique<SpriteBatch>(context);
 
     ComPtr<ID3D11Resource> resource;
     DX::ThrowIfFailed(
-        CreateWICTextureFromFile(device, L"cat.png",
+        CreateWICTextureFromFile(device, L"cat.dds",
             resource.GetAddressOf(),
             m_texture.ReleaseAndGetAddressOf()));
 
@@ -200,6 +203,14 @@ void Game::CreateDeviceDependentResources()
 
     m_origin.x = float(catDesc.Width / 2);
     m_origin.y = float(catDesc.Height / 2);
+    m_states = std::make_unique<CommonStates>(device);
+    m_tileRect.left = catDesc.Width * 2;
+    m_tileRect.right = catDesc.Width * 6;
+    m_tileRect.top = catDesc.Height * 2;
+    m_tileRect.bottom = catDesc.Height * 6;
+    DX::ThrowIfFailed(
+        CreateWICTextureFromFile(device, L"sunset.jpg", nullptr,
+            m_background.ReleaseAndGetAddressOf()));
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -209,6 +220,13 @@ void Game::CreateWindowSizeDependentResources()
     auto size = m_deviceResources->GetOutputSize();
     m_screenPos.x = float(size.right) / 2.f;
     m_screenPos.y = float(size.bottom) / 2.f;
+    m_stretchRect.left = size.right / 4;
+    m_stretchRect.top = size.bottom / 4;
+    m_stretchRect.right = m_stretchRect.left + size.right / 2;
+    m_stretchRect.bottom = m_stretchRect.top + size.bottom / 2;
+    m_fullscreenRect = m_deviceResources->GetOutputSize();
+
+
 }
 
 void Game::OnDeviceLost()
@@ -216,6 +234,9 @@ void Game::OnDeviceLost()
     // TODO: Add Direct3D resource cleanup here.
     m_texture.Reset();
     m_spriteBatch.reset();
+    m_states.reset();
+    m_background.Reset();
+
 }
 
 void Game::OnDeviceRestored()
