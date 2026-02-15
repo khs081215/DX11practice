@@ -80,10 +80,26 @@ void Game::Render()
     context;
 
     m_deviceResources->PIXEndEvent();
+    
+    m_spriteBatch->Begin();
 
+    const wchar_t* output = L"Hello World";
 
+    SimpleMath::Vector2 origin = m_font->MeasureString(output) / 2.f;
 
+    m_font->DrawString(m_spriteBatch.get(), output,
+        m_fontPos + SimpleMath::Vector2(1.f, 1.f), Colors::Black, 0.f, origin);
+    m_font->DrawString(m_spriteBatch.get(), output,
+        m_fontPos + SimpleMath::Vector2(-1.f, 1.f), Colors::Black, 0.f, origin);
+    m_font->DrawString(m_spriteBatch.get(), output,
+        m_fontPos + SimpleMath::Vector2(-1.f, -1.f), Colors::Black, 0.f, origin);
+    m_font->DrawString(m_spriteBatch.get(), output,
+        m_fontPos + SimpleMath::Vector2(1.f, -1.f), Colors::Black, 0.f, origin);
 
+    m_font->DrawString(m_spriteBatch.get(), output,
+        m_fontPos, Colors::White, 0.f, origin);
+
+    m_spriteBatch->End();
 
 
     // Show the new frame.
@@ -174,22 +190,25 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     device;
-
-
-    
+    m_font = std::make_unique<SpriteFont>(device, L"myfile.spritefont");
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    m_spriteBatch = std::make_unique<SpriteBatch>(context);
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
     // TODO: Initialize windows-size dependent objects here.
-
+    auto size = m_deviceResources->GetOutputSize();
+    m_fontPos.x = float(size.right) / 2.f;
+    m_fontPos.y = float(size.bottom) / 2.f;
 }
 
 void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
-
+    m_font.reset();
+    m_spriteBatch.reset();
 }
 
 void Game::OnDeviceRestored()
