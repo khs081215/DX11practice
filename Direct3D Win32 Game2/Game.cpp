@@ -58,6 +58,17 @@ void Game::Update(DX::StepTimer const& timer)
 
     // TODO: Add your game logic here.
     elapsedTime;
+    auto time = static_cast<float>(m_timer.GetTotalSeconds());
+
+    float yaw = time * 0.4f;
+    float pitch = time * 0.7f;
+    float roll = time * 1.1f;
+
+    auto quat = SimpleMath::Quaternion::CreateFromYawPitchRoll(pitch, yaw, roll);
+
+    auto light = XMVector3Rotate(g_XMOne, quat);
+
+    m_effect->SetLightDirection(0, light);
 }
 #pragma endregion
 
@@ -81,7 +92,26 @@ void Game::Render()
 
     m_deviceResources->PIXEndEvent();
 
+    context->OMSetBlendState(m_states->Opaque(), nullptr, 0xFFFFFFFF);
+    context->OMSetDepthStencilState(m_states->DepthNone(), 0);
+    context->RSSetState(m_states->CullNone());
 
+    m_effect->Apply(context);
+
+    auto sampler = m_states->LinearClamp();
+    context->PSSetSamplers(0, 1, &sampler);
+
+    context->IASetInputLayout(m_inputLayout.Get());
+
+    m_batch->Begin();
+
+    VertexPositionNormalTexture v1(SimpleMath::Vector3(400.f, 150.f, 0.f), -SimpleMath::Vector3::UnitZ, SimpleMath::Vector2(.5f, 0));
+    VertexPositionNormalTexture v2(SimpleMath::Vector3(600.f, 450.f, 0.f), -SimpleMath::Vector3::UnitZ, SimpleMath::Vector2(1, 1));
+    VertexPositionNormalTexture v3(SimpleMath::Vector3(200.f, 450.f, 0.f), -SimpleMath::Vector3::UnitZ, SimpleMath::Vector2(0, 1));
+
+    m_batch->DrawTriangle(v1, v2, v3);
+
+    m_batch->End();
 
 
 
@@ -174,7 +204,27 @@ void Game::CreateDeviceDependentResources()
 
     // TODO: Initialize device dependent objects here (independent of window size).
     device;
+    DX::ThrowIfFailed(
+    CreateWICTextureFromFile(device, L"rocks.jpg", nullptr,
+    m_texture.ReleaseAndGetAddressOf()));
+    m_states = std::make_unique<CommonStates>(device);
 
+    m_effect = std::make_unique<NormalMapEffect>(device);
+    //m_effect->SetVertexColorEnabled(true);
+    m_effect->SetTexture(m_texture.Get());
+    m_effect->SetNormalTexture(m_normalMap.Get());
+    m_effect->EnableDefaultLighting();
+    m_effect->SetLightDiffuseColor(0, Colors::Gray);
+    
+    DX::ThrowIfFailed(
+        CreateInputLayoutFromEffect<VertexType>(device, m_effect.get(),
+            m_inputLayout.ReleaseAndGetAddressOf())
+        );
+    DX::ThrowIfFailed(
+        CreateDDSTextureFromFile(device, L"rocks_normalmap.dds", nullptr,
+        m_normalMap.ReleaseAndGetAddressOf()));
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    m_batch = std::make_unique<PrimitiveBatch<VertexType>>(context);
 
     
 }
@@ -183,13 +233,23 @@ void Game::CreateDeviceDependentResources()
 void Game::CreateWindowSizeDependentResources()
 {
     // TODO: Initialize windows-size dependent objects here.
+    auto size = m_deviceResources->GetOutputSize();
 
+    SimpleMath::Matrix proj = SimpleMath::Matrix::CreateScale( 2.f/float(size.right),
+                                                   -2.f/float(size.bottom), 1.f)
+       * SimpleMath::Matrix::CreateTranslation( -1.f, 1.f, 0.f );
+    m_effect->SetProjection(proj);
 }
 
 void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
-
+    m_states.reset();
+    m_effect.reset();
+    m_batch.reset();
+    m_inputLayout.Reset();
+    m_texture.Reset();
+    m_normalMap.Reset();
 }
 
 void Game::OnDeviceRestored()

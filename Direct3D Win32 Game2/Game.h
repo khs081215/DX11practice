@@ -12,6 +12,8 @@
 
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
+
+
 class Game final : public DX::IDeviceNotify
 {
 public:
@@ -62,6 +64,14 @@ private:
 
     // Rendering loop timer.
     DX::StepTimer                           m_timer;
+    
+    using VertexType = DirectX::VertexPositionNormalTexture;
 
+    std::unique_ptr<DirectX::CommonStates> m_states;
+    std::unique_ptr<DirectX::NormalMapEffect> m_effect;
+    std::unique_ptr<DirectX::PrimitiveBatch<VertexType>> m_batch;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_normalMap;
 
 };
