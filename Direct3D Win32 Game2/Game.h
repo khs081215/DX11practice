@@ -63,5 +63,20 @@ private:
     // Rendering loop timer.
     DX::StepTimer                           m_timer;
 
+    
+    std::unique_ptr<DirectX::CommonStates> m_states;
+    std::unique_ptr<DirectX::BasicEffect> m_effect;
+    std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_batch;
+
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
+
+    DirectX::SimpleMath::Matrix m_world;
+    DirectX::SimpleMath::Matrix m_view;
+    DirectX::SimpleMath::Matrix m_proj;
+    
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_raster;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_offscreenRenderTarget;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_offscreenRenderTargetSRV;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilSRV;
 
 };
